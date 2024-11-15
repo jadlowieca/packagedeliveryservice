@@ -1,8 +1,12 @@
 from datetime import datetime, timedelta
 from distances import Distances
+from hash import HashMap
+from packageclass import PackageStatus
+
 
 class Truck:
-    def __init__(self, capacity, speed, load, packages, mileage, address, depart_time):
+    def __init__(self, id, capacity, speed, load, packages, mileage, address, depart_time):
+        self.id=id
         self.capacity = capacity
         self.speed = speed
         self.load = load
@@ -17,10 +21,15 @@ class Truck:
     def __str__(self):
         return f'{self.capacity},{self.speed},{self.load},{self.packages},{self.mileage},{self.address},{self.depart_time}'
 
-    def truck_route(self, packages: dict, distances: Distances):
+    def truck_route(self, packages: HashMap, distances: Distances):
         total_mileage = 0.0
         current_location = self.location
         undelivered_packages = [str(pkg_id) for pkg_id in self.packages]
+        for package_key in undelivered_packages:
+            my_package=packages.lookup(package_key)
+            my_package.status=PackageStatus.ENROUTE
+            my_package.departure_time = self.time
+
         # While there are still undelivered packages
         while undelivered_packages:
             shortest_distance = float('inf')
@@ -34,7 +43,7 @@ class Truck:
 
             # Find the nearest package from the current location
             for package_id in undelivered_packages:
-                package = packages.get(package_id)
+                package = packages.lookup(package_id)
                 if package is None:
                     continue
                 distance = distances.distance_finder(current_location, package.address)
@@ -55,9 +64,13 @@ class Truck:
                 # Mark package as delivered with delivery time
                 nearest_package.arrival_time = self.time
                 undelivered_packages.remove(nearest_package.id)
+
+                # Set package to Delivered
+                nearest_package.status = PackageStatus.DELIVERED
+
                 # Print out the package delivery info
                 print(
-                    f"Delivered Package {nearest_package.id} to {nearest_package.address} at {self.time.strftime('%I:%M %p')}.")
+                    f"Truck {self.id} Delivered Package {nearest_package.id} to {nearest_package.address} at {self.time.strftime('%I:%M %p')}.")
 
         # Final report on the truck's route
         self.mileage = total_mileage

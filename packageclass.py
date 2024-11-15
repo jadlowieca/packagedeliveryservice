@@ -36,7 +36,7 @@ class Package:
         return f'Package {self.id}, {self.address}, {self.city}, {self.state}, {self.zip}, {self.deadline}, {self.arrival_time}, {self.weight}, {self.status.value}'
 
 def load_packages(file_path):
-    package_map = {}
+    package_map = HashMap()
 
     with open(file_path, newline='', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
@@ -62,7 +62,7 @@ def load_packages(file_path):
 
                 package = Package(package_id, address, city, state, zip_code, deadline, weight)
 
-                package_map[package_id]=package
+                package_map.insert(package_id, package)
                 print(package)
     return package_map
 
