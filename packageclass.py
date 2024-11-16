@@ -4,7 +4,7 @@ import csv
 
 class PackageStatus(str, Enum):
     ATHUB = "At the WGU Hub"
-    ENROUTE = "Package on the Way"
+    ENROUTE = "ENROUTE"
     DELIVERED = "Package delivered"
 
 class Package:
