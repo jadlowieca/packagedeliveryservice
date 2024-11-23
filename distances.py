@@ -44,4 +44,4 @@ class Distances:
             print(point_a, point_b)
         return distance
 
-Distances("C:\\Users\\Cindy\\PythonStuff\\WGUPS Distance Table.csv")
+Distances("Data/WGUPS Distance Table.csv")

@@ -1,4 +1,6 @@
 # Student ID: 011561882
+# NOTE please run from pythonProject directory
+# cd pythonProject 
 from distances import Distances
 from packageclass import load_packages, PackageStatus
 from truckclass import Truck
@@ -18,8 +20,8 @@ truck3 = Truck(3, 16, 18, None, [9, 11, 12, 17, 21, 22, 24, 32, 33, 35, 39], 0.0
                departure_time_truck3)
 
 # Load packages and distances
-packages = load_packages("C:\\Users\\Cindy\\PythonStuff\\WGUPS Package File.csv")
-distances = Distances("C:\\Users\\Cindy\\PythonStuff\\WGUPS Distance Table.csv")
+packages = load_packages("Data/WGUPS Package File.csv")
+distances = Distances("Data/WGUPS Distance Table.csv")
 
 
 # Function to query package statuses at a specific time
