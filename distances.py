@@ -33,7 +33,6 @@ class Distances:
                     distanceHash[distance_key] = hubDistances
 
         self.distances = distanceHash
-        print(self.distances.keys())
 
     def distance_finder(self, point_a, point_b):
         distance = self.distances.get(point_a).get(point_b)

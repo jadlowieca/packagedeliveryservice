@@ -68,11 +68,7 @@ class Truck:
                 # Set package to Delivered
                 nearest_package.status = PackageStatus.DELIVERED
 
-                # Print out the package delivery info
-                print(
-                    f"Truck {self.id} Delivered Package {nearest_package.id} to {nearest_package.address} at {self.time.strftime('%I:%M %p')}.")
 
         # Final report on the truck's route
         self.mileage = total_mileage
-        print(f"Total mileage for route: {total_mileage} miles.")
         return total_mileage

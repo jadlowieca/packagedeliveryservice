@@ -63,7 +63,6 @@ def load_packages(file_path):
                 package = Package(package_id, address, city, state, zip_code, deadline, weight)
 
                 package_map.insert(package_id, package)
-                print(package)
     return package_map
 
 
