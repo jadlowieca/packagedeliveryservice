@@ -8,24 +8,29 @@ from datetime import datetime, timedelta
 
 # Initialize trucks with departure times and package loads
 departure_time_truck1 = datetime.strptime("8:00 AM", "%I:%M %p")
-truck1 = Truck(1, 16, 18, None, [1, 13, 14, 15, 19, 16, 20, 29, 30, 31, 34, 37, 40], 0.0, "4001 South 700 East",
-               departure_time_truck1)
+truck1 = Truck(1, 16, 18, None, [1, 13, 14, 15, 19, 16, 20, 29, 30, 31, 34, 37, 40], 0.0, "4001 South 700 East", departure_time_truck1)
 
 departure_time_truck2 = datetime.strptime("9:05 AM", "%I:%M %p")
-truck2 = Truck(2, 16, 18, None, [2, 3, 4, 5, 6, 7, 8, 10, 18, 23, 25, 26, 27, 28, 36, 38], 0.0, "4001 South 700 East",
-               departure_time_truck2)
+truck2 = Truck(2, 16, 18, None, [2, 3, 4, 5, 6, 7, 8, 10, 18, 23, 25, 26, 27, 28, 36, 38], 0.0, "4001 South 700 East", departure_time_truck2)
 
 departure_time_truck3 = datetime.strptime("12:30 PM", "%I:%M %p")
-truck3 = Truck(3, 16, 18, None, [9, 11, 12, 17, 21, 22, 24, 32, 33, 35, 39], 0.0, "4001 South 700 East",
-               departure_time_truck3)
+truck3 = Truck(3, 16, 18, None, [9, 11, 12, 17, 21, 22, 24, 32, 33, 35, 39], 0.0, "4001 South 700 East", departure_time_truck3)
 
 # Load packages and distances
 packages = load_packages("Data/WGUPS Package File.csv")
 distances = Distances("Data/WGUPS Distance Table.csv")
 
 
-# Function to determine the package status at a given time
+# Function to determine the package status and handle address correction for Package 9
 def get_package_status(package, query_time):
+    # Special case for Package #9 to handle the dynamic address change
+    if package.id == "9":
+        address_change_time = datetime.strptime("10:20 AM", "%I:%M %p")
+        if query_time < address_change_time:
+            package.address = "300 State St"  # Original incorrect address
+        else:
+            package.address = "410 S State St"  # Corrected address
+
     if query_time < package.departure_time:
         return PackageStatus.ATHUB.value
     elif package.departure_time <= query_time < package.arrival_time:
@@ -34,19 +39,28 @@ def get_package_status(package, query_time):
         return PackageStatus.DELIVERED.value
 
 
+def get_truck_for_package(package):
+    # Check each truck's package list to see if the package is in it
+    for truck in [truck1, truck2, truck3]:
+        if str(package.id) in map(str, truck.packages):
+            return truck.id
+    return "Unknown"
+
+
 # Menu option 1: Print all packages status and total mileage
 def print_all_package_status():
     print("\nAll Packages Status and Total Mileage:")
     print(f"Total Mileage: {total_mileage_all_trucks:.2f} miles")
     print("------------------------------------------------------")
-    print(f"{'PackageID':<10} {'Address':<35} {'City':<15} {'State':<10} {'ZIP':<10} {'Deadline':<12} {'Weight (kg)':<10} {'Status':<15} {'Delivery Time':<15}")
-    print("-" * 130)
+    print(f"{'PackageID':<10} {'Address':<35} {'City':<15} {'State':<10} {'ZIP':<10} {'Deadline':<12} {'Weight (kg)':<10} {'Status':<15} {'Truck ID':<10} {'Delivery Time':<15}")
+    print("-" * 150)
     for package_id in range(1, 41):
         package = packages.lookup(str(package_id))
         if package:
             status = get_package_status(package, datetime.now())
             delivery_time = package.arrival_time.strftime('%I:%M %p') if package.arrival_time else "N/A"
-            print(f"{package.id:<10} {package.address:<35} {package.city:<15} {package.state:<10} {package.zip:<10} {package.deadline:<12} {package.weight:<10} {status:<15} {delivery_time:<15}")
+            truck_id = get_truck_for_package(package)
+            print(f"{package.id:<10} {package.address:<35} {package.city:<15} {package.state:<10} {package.zip:<10} {package.deadline:<12} {package.weight:<10} {status:<15} {truck_id:<10} {delivery_time:<15}")
 
 
 # Menu option 2: Get single package status with a time
@@ -64,15 +78,14 @@ def get_single_package_status():
     if package:
         status = get_package_status(package, query_time)
         delivery_time = package.arrival_time.strftime('%I:%M %p') if package.arrival_time else "N/A"
+        truck_id = get_truck_for_package(package)
         print("\nPackage Details:")
-        print(f"{'PackageID':<10} {'Address':<35} {'City':<15} {'State':<10} {'ZIP':<10} {'Deadline':<12} {'Weight (kg)':<10} {'Status':<15} {'Delivery Time':<15}")
-        print("-" * 130)
-        print(f"{package.id:<10} {package.address:<35} {package.city:<15} {package.state:<10} {package.zip:<10} {package.deadline:<12} {package.weight:<10} {status:<15} {delivery_time:<15}")
+        print(f"{'PackageID':<10} {'Address':<35} {'City':<15} {'State':<10} {'ZIP':<10} {'Deadline':<12} {'Weight (kg)':<10} {'Status':<15} {'Delivery Time':<15} {'Truck ID':<10}")
+        print("-" * 150)
+        print(f"{package.id:<10} {package.address:<35} {package.city:<15} {package.state:<10} {package.zip:<10} {package.deadline:<12} {package.weight:<10} {status:<15} {delivery_time:<15} {truck_id:<10}")
     else:
         print("Package not found.")
 
-
-# Menu option 3: Get all package status with a time
 def get_all_package_status():
     time_input = input("Enter the Time (HH:MM AM/PM): ").strip()
 
@@ -84,15 +97,15 @@ def get_all_package_status():
 
     print(f"\nPackage Status Report at {query_time.strftime('%I:%M %p')}")
     print("------------------------------------------------------")
-    print(f"{'PackageID':<10} {'Address':<35} {'City':<15} {'State':<10} {'ZIP':<10} {'Deadline':<12} {'Weight (kg)':<10} {'Status':<15} {'Delivery Time':<15}")
-    print("-" * 130)
-    for package_id in range(1, 41):  # Assuming package IDs range from 1 to 40
+    print(f"{'PackageID':<10} {'Address':<35} {'City':<15} {'State':<10} {'ZIP':<10} {'Deadline':<12} {'Weight (kg)':<10} {'Status':<15} {'Truck ID':<10} {'Delivery Time':<15}")
+    print("-" * 150)
+    for package_id in range(1, 41):
         package = packages.lookup(str(package_id))
         if package:
             status = get_package_status(package, query_time)
             delivery_time = package.arrival_time.strftime('%I:%M %p') if package.arrival_time else "N/A"
-            print(f"{package.id:<10} {package.address:<35} {package.city:<15} {package.state:<10} {package.zip:<10} {package.deadline:<12} {package.weight:<10} {status:<15} {delivery_time:<15}")
-
+            truck_id = get_truck_for_package(package)
+            print(f"{package.id:<10} {package.address:<35} {package.city:<15} {package.state:<10} {package.zip:<10} {package.deadline:<12} {package.weight:<10} {status:<15} {truck_id:<10} {delivery_time:<15}")
 
 # Execute the route for each truck and calculate total mileage
 total_mileage_all_trucks = 0.0
