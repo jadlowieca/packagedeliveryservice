@@ -39,7 +39,6 @@ class Truck:
             if self.time >= address_change_time:
                 if packages['9'].address == "300 State St":  # Check if address hasn't been updated
                     packages['9'].address = "410 S State St"
-                    print("Address for Package 9 has been updated to 410 S. State St.")
 
             # Find the nearest package from the current location
             for package_id in undelivered_packages:
